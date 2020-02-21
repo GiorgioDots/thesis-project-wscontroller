@@ -79,7 +79,7 @@ module.exports = {
             this.connections[id].emit(chatRoom, message);
             return Promise.resolve(true);
         }
-        logger.debug(`Private message sent to unknown user: ${id}`);
+        console.debug(`Private message sent to unknown user: ${id}`);
         return Promise.resolve(false);
     },
 };
