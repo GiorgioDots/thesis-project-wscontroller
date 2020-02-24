@@ -16,6 +16,8 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
+app.use(bodyParser.json());
+app.use('/raspi', raspiRoutes);
 app.use((error, req, res, next) => {
     console.log(error);
     const status = error.statusCode || 500;
@@ -23,8 +25,8 @@ app.use((error, req, res, next) => {
     const data = error.data;
     res.status(status).json({ message: message, data: data });
 });
-app.use(bodyParser.json());
-app.use('/raspi', raspiRoutes);
+
+
 
 
 const server = http.createServer(app);
