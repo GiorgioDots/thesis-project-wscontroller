@@ -18,7 +18,7 @@ module.exports.sendMessage = (req, res, next) => {
                 res.status(200).json({ status: "RapiId updated" })
             }
             else {
-                throw new Error(`An error occured while sending the configuration for raspberry: ${raspiId}`);
+                next(`Could not connect to raspberry: ${raspiId}, please check the internet connection.`);
             }
         })
         .catch(error => {
