@@ -8,7 +8,7 @@ module.exports.sendMessage = (req, res, next) => {
     if (!raspiId) {
         throw new Error("No raspiId sent");
     }
-    if (!message) {
+    if (Object.keys(message) == 0 && message.constructor === Object) {
         throw new Error("No body found inside the request");
     }
 
@@ -18,7 +18,7 @@ module.exports.sendMessage = (req, res, next) => {
                 res.status(200).json({ status: "RapiId updated" })
             }
             else {
-                next(`Could not connect to raspberry: ${raspiId}, please check the internet connection.`);
+                throw new Error(`Could not connect to raspberry: ${raspiId}, please check the internet connection`);
             }
         })
         .catch(error => {
