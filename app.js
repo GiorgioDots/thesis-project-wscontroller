@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const logger = require("./services/winston");
 const socketIO = require("./services/socket.io");
 const raspberryRoutes = require("./api/routes/raspberry");
-const eventRoutes = require("./api/routes/events");
+const userRoutes = require("./api/routes/user");
 
 const app = express();
 
@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.use("/raspberry", raspberryRoutes);
-app.use("/event", eventRoutes);
+app.use("/user", userRoutes);
 
 app.use((error, req, res, next) => {
   logger.error(error.message);
