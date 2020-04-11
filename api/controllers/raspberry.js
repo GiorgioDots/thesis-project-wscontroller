@@ -45,7 +45,7 @@ exports.restartRaspberries = async (req, res, next) => {
     }
     if (raspNotConnected.length > 0) {
       const error = new Error(
-        `could not connect to raspberries: ${raspNotConnected.join()}, please check if it's connected to the internet.`
+        `could not connect to raspberries: ${raspNotConnected.join()}, please check if they are connected to the internet.`
       );
       error.statusCode = 404;
       error.data = raspNotConnected;
