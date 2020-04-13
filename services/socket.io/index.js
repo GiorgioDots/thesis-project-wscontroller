@@ -16,6 +16,7 @@ module.exports = {
       let clientStatus = {
         isConnected: false,
         id: null,
+        socketId: null,
       };
       logger.info("WebSocket: client connected");
 
@@ -23,11 +24,17 @@ module.exports = {
         logger.info("WebSocket: client disconnected.");
         const disconnectedClientId = _.findKey(connections, socket.id);
         if (disconnectedClientId) {
-          delete connections[disconnectedClientId];
+          connections[disconnectedClientId] = connections[
+            disconnectedClientId
+          ].filter((s) => s.id !== clientStatus.socketId);
           clientStatus = {
             isConnected: false,
             id: null,
+            socketId: null,
           };
+          if (connections[disconnectedClientId].length === 0) {
+            delete connections[disconnectedClientId];
+          }
         }
       });
 
@@ -35,33 +42,18 @@ module.exports = {
         try {
           const jmsg = JSON.parse(msg);
           if (jmsg.id) {
-            if (clientStatus.isConnected && clientStatus.id === jmsg.id) {
-              logger.info(
-                `WebSocket: user already connected with same id [${jmsg.id}] on socket ${socket.id}.`
-              );
-            } else if (
-              clientStatus.isConnected &&
-              clientStatus.id !== jmsg.id
-            ) {
-              logger.info(
-                `WebSocket: user [${jmsg.id}] already connected with different id [${clientStatus.id}] on socket ${socket.id}.`
-              );
-            } else if (connections[jmsg.id]) {
-              logger.info(
-                `WebSocket: user [${
-                  jmsg.id
-                }] already connected on different socket: [${
-                  connections[jmsg.id].id
-                }]. Message received on socket ${socket.id}.`
-              );
+            if (connections[jmsg.id]) {
+              connections[jmsg.id].push(socket);
             } else {
-              connections[jmsg.id] = socket;
-              clientStatus.isConnected = true;
-              clientStatus.id = jmsg.id;
-              logger.info(
-                `WebSocket: New user successfully connected with id ${jmsg.id} on socket ${socket.id}.`
-              );
+              connections[jmsg.id] = [socket];
             }
+            clientStatus.isConnected = true;
+            clientStatus.id = jmsg.id;
+            clientStatus.socketId = socket.id;
+            console.log(connections);
+            logger.info(
+              `WebSocket: New user successfully connected with id ${jmsg.id} on socket ${socket.id}.`
+            );
           }
         } catch (error) {
           logger.error(`Malformed payload: failed to parseJSON ${msg}`);
@@ -73,7 +65,10 @@ module.exports = {
   sendPrivate(id, chatRoom, message) {
     if (this.connections[id]) {
       //chatroom is a string needed to create an event. use this chatroom to identify raspberry and users (e.g.: 'raspi' or 'events');
-      this.connections[id].emit(chatRoom, message);
+      for (let conn of this.connections[id]) {
+        console.log(conn);
+        conn.emit(chatRoom, message);
+      }
       return Promise.resolve(true);
     }
     logger.info(`Private message sent to unknown user: ${id}`);
